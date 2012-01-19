@@ -1,0 +1,11 @@
+.DS_Store
+.project
+.settings
+.classpath
+shoppinglist-dbmodel/.settings
+shoppinglist-server/.settings
+shoppinglist-dbmodel/.classpath
+shoppinglist-server/.classpath
+target
+bin
+gen
