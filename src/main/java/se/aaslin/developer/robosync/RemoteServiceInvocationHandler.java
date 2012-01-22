@@ -15,6 +15,7 @@
  */
 package se.aaslin.developer.robosync;
 
+import android.content.Context;
 import android.os.AsyncTask;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -71,22 +72,24 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
 	private String serializationPolicyName;
 	private CookieManager cookieManager;
 	private boolean waitForInvocation;
-
-	public RemoteServiceInvocationHandler(String moduleBaseURL, String remoteServiceRelativePath, String serializationPolicyName, CookieManager cookieManager) {
-		this(moduleBaseURL, remoteServiceRelativePath, serializationPolicyName, cookieManager, false);
+	private Context context;
+	
+	public RemoteServiceInvocationHandler(String moduleBaseURL, String remoteServiceRelativePath, String serializationPolicyName, CookieManager cookieManager, Context context) {
+		this(moduleBaseURL, remoteServiceRelativePath, serializationPolicyName, cookieManager, false, context);
 	}
 
 	public RemoteServiceInvocationHandler(String moduleBaseURL, String remoteServiceRelativePath, String serializationPolicyName, CookieManager cookieManager,
-			boolean waitForInvocation) {
+			boolean waitForInvocation, Context context) {
 		this.moduleBaseURL = moduleBaseURL;
 		this.remoteServiceRelativePath = remoteServiceRelativePath;
 		this.serializationPolicyName = serializationPolicyName;
 		this.cookieManager = cookieManager;
 		this.waitForInvocation = waitForInvocation;
+		this.context = context;
 	}
 
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		RemoteServiceSyncProxy syncProxy = new RemoteServiceSyncProxy(moduleBaseURL, remoteServiceRelativePath, serializationPolicyName, cookieManager);
+		RemoteServiceSyncProxy syncProxy = new RemoteServiceSyncProxy(moduleBaseURL, remoteServiceRelativePath, serializationPolicyName, cookieManager, context);
 		Class remoteServiceInft = method.getDeclaringClass();
 		for (Class intf : proxy.getClass().getInterfaces()) {
 			if (RemoteService.class.isAssignableFrom(intf)) {

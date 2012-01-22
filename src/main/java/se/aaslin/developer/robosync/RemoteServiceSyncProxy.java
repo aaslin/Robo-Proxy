@@ -15,6 +15,18 @@
  */
 package se.aaslin.developer.robosync;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import android.content.Context;
+
 import com.google.gwt.user.client.rpc.InvocationException;
 import com.google.gwt.user.client.rpc.RpcRequestBuilder;
 import com.google.gwt.user.client.rpc.SerializationException;
@@ -23,17 +35,6 @@ import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.google.gwt.user.client.rpc.impl.RequestCallbackAdapter;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.google.gwt.user.server.rpc.SerializationPolicyLoader;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 /**
  * Base on {@link com.google.gwt.user.client.rpc.impl.RemoteServiceProxy}
@@ -63,7 +64,7 @@ public class RemoteServiceSyncProxy implements SerializationStreamFactory {
 	private SerializationPolicy serializationPolicy;
 	private CookieManager cookieManager;
 
-	public RemoteServiceSyncProxy(String moduleBaseURL, String remoteServiceRelativePath, String serializationPolicyName, CookieManager cookieManager) {
+	public RemoteServiceSyncProxy(String moduleBaseURL, String remoteServiceRelativePath, String serializationPolicyName, CookieManager cookieManager, Context context) throws IOException {
 		this.moduleBaseURL = moduleBaseURL;
 		this.remoteServiceURL = moduleBaseURL + remoteServiceRelativePath;
 		this.serializationPolicyName = serializationPolicyName;
@@ -73,7 +74,7 @@ public class RemoteServiceSyncProxy implements SerializationStreamFactory {
 			serializationPolicy = new DummySerializationPolicy();
 		} else {
 			String policyFileName = SerializationPolicyLoader.getSerializationPolicyFileName(serializationPolicyName);
-			InputStream is = getClass().getResourceAsStream("/" + policyFileName);
+			InputStream is = context.getAssets().open(new StringBuilder().append(policyFileName).toString());
 			try {
 				if (is == null) {
 					// Try to get from cache

@@ -15,16 +15,14 @@
  */
 package se.aaslin.developer.robosync;
 
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-
-import java.io.IOException;
-
 import java.lang.reflect.Proxy;
-
 import java.net.CookieManager;
 import java.net.CookiePolicy;
-
 import java.util.Map;
+
+import android.content.Context;
+
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 /**
  * Sync Proxy for GWT RemoteService Usage: MyServiceInterface myService =
@@ -50,10 +48,16 @@ public class SyncProxy {
 	/**
 	 * Map from ServiceInterface class name to Serialization Policy name
 	 */
-	private static final Map<String, String> POLICY_MAP = RpcPolicyFinder.searchPolicyFileInClassPath();
+//	private static final Map<String, String> POLICY_MAP = RpcPolicyFinder.searchPolicyFilesInAssets(context, "gwt.rpc.policies");
 
 	private static final CookieManager DEFAULT_COOKIE_MANAGER = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
 
+	
+	public static Object newProxyInstance(Class serviceIntf, String moduleBaseURL, String remoteServiceRelativePath, Context context){
+		Map<String, String> policyMap = RpcPolicyFinder.searchPolicyFilesInAssets(context, "gwt.rpc.policies");
+		return newProxyInstance(serviceIntf, moduleBaseURL, remoteServiceRelativePath, policyMap.get(serviceIntf.getName()), DEFAULT_COOKIE_MANAGER, context);
+	}
+	
 	/**
 	 * Create a new Proxy for the specified <code>serviceIntf</code>
 	 * 
@@ -74,12 +78,13 @@ public class SyncProxy {
 	 */
 	@SuppressWarnings("unchecked")
 	public static Object newProxyInstance(Class serviceIntf, String moduleBaseURL, String remoteServiceRelativePath, String policyName,
-			CookieManager cookieManager, boolean waitForInvocation) {
+			CookieManager cookieManager, boolean waitForInvocation, Context context) {
 		if (cookieManager == null) {
 			cookieManager = DEFAULT_COOKIE_MANAGER;
 		}
 
 //		if (policyName == null) {
+//			
 //			try {
 //				POLICY_MAP.putAll(RpcPolicyFinder.fetchSerializationPolicyName(moduleBaseURL));
 //				policyName = POLICY_MAP.get(serviceIntf.getName());
@@ -89,12 +94,12 @@ public class SyncProxy {
 //		}
 
 		return Proxy.newProxyInstance(SyncProxy.class.getClassLoader(), new Class[] { serviceIntf }, new RemoteServiceInvocationHandler(moduleBaseURL,
-				remoteServiceRelativePath, policyName, cookieManager, waitForInvocation));
+				remoteServiceRelativePath, policyName, cookieManager, waitForInvocation, context));
 	}
 
 	public static Object newProxyInstance(Class serviceIntf, String moduleBaseURL, String remoteServiceRelativePath, String policyName,
-			CookieManager cookieManager) {
-		return newProxyInstance(serviceIntf, moduleBaseURL, remoteServiceRelativePath, policyName, cookieManager, false);
+			CookieManager cookieManager, Context context) {
+		return newProxyInstance(serviceIntf, moduleBaseURL, remoteServiceRelativePath, policyName, cookieManager, false, context);
 	}
 
 	/**
@@ -113,8 +118,8 @@ public class SyncProxy {
 	 *         serviceIntf
 	 */
 	@SuppressWarnings("unchecked")
-	public static Object newProxyInstance(Class serviceIntf, String moduleBaseURL, String remoteServiceRelativePath, String policyName) {
-		return newProxyInstance(serviceIntf, moduleBaseURL, remoteServiceRelativePath, policyName, DEFAULT_COOKIE_MANAGER);
+	public static Object newProxyInstance(Class serviceIntf, String moduleBaseURL, String remoteServiceRelativePath, String policyName, Context context) {
+		return newProxyInstance(serviceIntf, moduleBaseURL, remoteServiceRelativePath, policyName, DEFAULT_COOKIE_MANAGER, context);
 	}
 
 	/**
@@ -130,10 +135,10 @@ public class SyncProxy {
 	 * @return A new proxy object which implements the service interface
 	 *         serviceIntf
 	 */
-	@SuppressWarnings("unchecked")
-	public static Object newProxyInstance(Class serviceIntf, String moduleBaseURL, String remoteServiceRelativePath) {
-		return newProxyInstance(serviceIntf, moduleBaseURL, remoteServiceRelativePath, POLICY_MAP.get(serviceIntf.getName()), DEFAULT_COOKIE_MANAGER);
-	}
+//	@SuppressWarnings("unchecked")
+//	public static Object newProxyInstance(Class serviceIntf, String moduleBaseURL, String remoteServiceRelativePath) {
+//		return newProxyInstance(serviceIntf, moduleBaseURL, remoteServiceRelativePath, POLICY_MAP.get(serviceIntf.getName()), DEFAULT_COOKIE_MANAGER);
+//	}
 
 	/**
 	 * Create a new Proxy for the specified service interface
@@ -150,40 +155,40 @@ public class SyncProxy {
 	 * @return A new proxy object which implements the service interface
 	 *         serviceIntf
 	 */
-	@SuppressWarnings("unchecked")
-	public static Object newProxyInstance(Class serviceIntf, String moduleBaseURL, String remoteServiceRelativePath, CookieManager cookieManager) {
-		return newProxyInstance(serviceIntf, moduleBaseURL, remoteServiceRelativePath, POLICY_MAP.get(serviceIntf.getName()), cookieManager);
-	}
-
-	public static Object newProxyInstance(Class serviceIntf, String moduleBaseURL, CookieManager cookieManager, boolean waitForInvocation) {
-		RemoteServiceRelativePath relativePathAnn = (RemoteServiceRelativePath) serviceIntf.getAnnotation(RemoteServiceRelativePath.class);
-		if (serviceIntf.getName().endsWith("Async")) {
-			// Try determine remoteServiceRelativePath from the 'sync' version
-			// of the Async one
-			String className = serviceIntf.getName();
-			try {
-				Class clazz = Class.forName(className.substring(0, className.length() - 5));
-				relativePathAnn = (RemoteServiceRelativePath) clazz.getAnnotation(RemoteServiceRelativePath.class);
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			}
-		}
-		if (relativePathAnn == null) {
-			throw new RuntimeException(serviceIntf + " does not has a RemoteServiceRelativePath annotation");
-		}
-		String remoteServiceRelativePath = relativePathAnn.value();
-		return newProxyInstance(serviceIntf, moduleBaseURL, remoteServiceRelativePath, POLICY_MAP.get(serviceIntf.getName()), cookieManager, waitForInvocation);
-	}
-
-	public static Object newProxyInstance(Class serviceIntf, String moduleBaseURL, CookieManager cookieManager) {
-		return newProxyInstance(serviceIntf, moduleBaseURL, cookieManager, false);
-	}
-
-	public static Object newProxyInstance(Class serviceIntf, String moduleBaseURL) {
-		return newProxyInstance(serviceIntf, moduleBaseURL, DEFAULT_COOKIE_MANAGER);
-	}
-
-	public static Object newProxyInstance(Class serviceIntf, String moduleBaseURL, boolean waitForInvocation) {
-		return newProxyInstance(serviceIntf, moduleBaseURL, DEFAULT_COOKIE_MANAGER, waitForInvocation);
-	}
+//	@SuppressWarnings("unchecked")
+//	public static Object newProxyInstance(Class serviceIntf, String moduleBaseURL, String remoteServiceRelativePath, CookieManager cookieManager) {
+//		return newProxyInstance(serviceIntf, moduleBaseURL, remoteServiceRelativePath, POLICY_MAP.get(serviceIntf.getName()), cookieManager);
+//	}
+//
+//	public static Object newProxyInstance(Class serviceIntf, String moduleBaseURL, CookieManager cookieManager, boolean waitForInvocation) {
+//		RemoteServiceRelativePath relativePathAnn = (RemoteServiceRelativePath) serviceIntf.getAnnotation(RemoteServiceRelativePath.class);
+//		if (serviceIntf.getName().endsWith("Async")) {
+//			// Try determine remoteServiceRelativePath from the 'sync' version
+//			// of the Async one
+//			String className = serviceIntf.getName();
+//			try {
+//				Class clazz = Class.forName(className.substring(0, className.length() - 5));
+//				relativePathAnn = (RemoteServiceRelativePath) clazz.getAnnotation(RemoteServiceRelativePath.class);
+//			} catch (ClassNotFoundException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//		if (relativePathAnn == null) {
+//			throw new RuntimeException(serviceIntf + " does not has a RemoteServiceRelativePath annotation");
+//		}
+//		String remoteServiceRelativePath = relativePathAnn.value();
+//		return newProxyInstance(serviceIntf, moduleBaseURL, remoteServiceRelativePath, POLICY_MAP.get(serviceIntf.getName()), cookieManager, waitForInvocation);
+//	}
+//
+//	public static Object newProxyInstance(Class serviceIntf, String moduleBaseURL, CookieManager cookieManager) {
+//		return newProxyInstance(serviceIntf, moduleBaseURL, cookieManager, false);
+//	}
+//
+//	public static Object newProxyInstance(Class serviceIntf, String moduleBaseURL) {
+//		return newProxyInstance(serviceIntf, moduleBaseURL, DEFAULT_COOKIE_MANAGER);
+//	}
+//
+//	public static Object newProxyInstance(Class serviceIntf, String moduleBaseURL, boolean waitForInvocation) {
+//		return newProxyInstance(serviceIntf, moduleBaseURL, DEFAULT_COOKIE_MANAGER, waitForInvocation);
+//	}
 }
