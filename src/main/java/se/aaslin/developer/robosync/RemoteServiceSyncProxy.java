@@ -127,6 +127,7 @@ public class RemoteServiceSyncProxy implements SerializationStreamFactory {
 			CookieHandler.setDefault(cookieManager);
 
 			URL url = new URL(remoteServiceURL);
+			
 			connection = (HttpURLConnection) url.openConnection();
 			connection.setDoInput(true);
 			connection.setDoOutput(true);
