@@ -8,6 +8,10 @@
 
 	<repositories>
 		<repository>
+			<id>snapshots</id>
+			<url>http://ll.homenet.org:8081/nexus/content/repositories/snapshots/</url>
+		</repository>
+		<repository>
 			<id>releases</id>
 			<url>http://ll.homenet.org:8081/nexus/content/repositories/releases/</url>
 		</repository>
@@ -41,13 +45,34 @@
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
-	<distributionManagement>
-		<repository>
-			<uniqueVersion>false</uniqueVersion>
-			<id>releases</id>
-			<name>Releases</name>
-			<url>http://ll.homenet.org:8081/nexus/content/repositories/releases/</url>
-			<layout>default</layout>
-		</repository>
-	</distributionManagement>
+	<profiles>
+		<profile>
+			<id>release</id>
+			<distributionManagement>
+				<repository>
+					<uniqueVersion>false</uniqueVersion>
+					<id>releases</id>
+					<name>Releases</name>
+					<url>http://ll.homenet.org:8081/nexus/content/repositories/releases/</url>
+					<layout>default</layout>
+				</repository>
+			</distributionManagement>
+		</profile>
+		<profile>
+			<id>snapshot</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<distributionManagement>
+				<repository>
+					<uniqueVersion>false</uniqueVersion>
+					<id>snapshots</id>
+					<name>Snapshots</name>
+					<url>http://ll.homenet.org:8081/nexus/content/repositories/snapshots/</url>
+					<layout>default</layout>
+				</repository>
+			</distributionManagement>
+		</profile>
+	</profiles>
+
 </project>
