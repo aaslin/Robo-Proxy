@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>se.aaslin.developer</groupId>
-	<artifactId>robosync</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>Robo-Sync</name>
+	<artifactId>roboproxy</artifactId>
+	<version>1.0</version>
+	<name>Robo-Proxy</name>
 	<description>A framwork for GWT RPC interaction from Android devices	</description>
 
 	<repositories>
@@ -44,9 +44,9 @@
 	<distributionManagement>
 		<repository>
 			<uniqueVersion>false</uniqueVersion>
-			<id>snapshots</id>
-			<name>Snapshots</name>
-			<url>http://ll.homenet.org:8081/nexus/content/repositories/snapshots/</url>
+			<id>releases</id>
+			<name>Releases</name>
+			<url>http://ll.homenet.org:8081/nexus/content/repositories/releases/</url>
 			<layout>default</layout>
 		</repository>
 	</distributionManagement>
