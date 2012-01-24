@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package se.aaslin.developer.robosync;
+package se.aaslin.developer.roboproxy.io;
 
 
 import com.google.gwt.user.client.rpc.SerializationException;
@@ -31,6 +31,8 @@ import java.lang.reflect.Modifier;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+
+import se.aaslin.developer.roboproxy.util.Utils;
 
 
 /**

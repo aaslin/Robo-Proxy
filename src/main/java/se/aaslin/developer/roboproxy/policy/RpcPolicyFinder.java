@@ -1,4 +1,4 @@
-package se.aaslin.developer.robosync;
+package se.aaslin.developer.roboproxy.policy;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package se.aaslin.developer.robosync;
+package se.aaslin.developer.roboproxy.io;
 
 
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
@@ -39,6 +39,10 @@ import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import se.aaslin.developer.roboproxy.remote.RemoteServiceSyncProxy;
+import se.aaslin.developer.roboproxy.remote.RemoteServiceSyncProxy.DummySerializationPolicy;
+import se.aaslin.developer.roboproxy.util.Utils;
 
 
 /**

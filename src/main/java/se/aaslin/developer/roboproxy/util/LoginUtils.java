@@ -1,4 +1,4 @@
-package se.aaslin.developer.robosync;
+package se.aaslin.developer.roboproxy.util;
 
 import com.google.gdata.client.GoogleAuthTokenFactory;
 import com.google.gdata.util.AuthenticationException;

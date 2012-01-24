@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package se.aaslin.developer.robosync;
+package se.aaslin.developer.roboproxy.remote;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -24,6 +24,10 @@ import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import se.aaslin.developer.roboproxy.io.SyncClientSerializationStreamReader;
+import se.aaslin.developer.roboproxy.io.SyncClientSerializationStreamWriter;
+import se.aaslin.developer.roboproxy.policy.RpcPolicyFinder;
 
 import android.content.Context;
 
