@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package se.aaslin.developer.roboproxy.io;
+package com.gdevelop.gwt.syncrpc;
 
 
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
@@ -42,7 +42,6 @@ import java.util.Map;
 
 import se.aaslin.developer.roboproxy.remote.RemoteServiceSyncProxy;
 import se.aaslin.developer.roboproxy.remote.RemoteServiceSyncProxy.DummySerializationPolicy;
-import se.aaslin.developer.roboproxy.util.Utils;
 
 
 /**

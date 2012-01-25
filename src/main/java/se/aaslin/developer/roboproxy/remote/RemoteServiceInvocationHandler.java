@@ -35,27 +35,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RemoteServiceInvocationHandler implements InvocationHandler {
-	private static final Map<Class, ResponseReader> JPRIMITIVETYPE_TO_RESPONSEREADER = new HashMap<Class, ResponseReader>();
+	private static final Map<Class<?>, ResponseReader> JPRIMITIVETYPE_TO_RESPONSEREADER = new HashMap<Class<?>, ResponseReader>();
 	static {
-		// JPRIMITIVETYPE_TO_RESPONSEREADER.put(Boolean.class,
-		// ResponseReader.BOOLEAN);
-		// JPRIMITIVETYPE_TO_RESPONSEREADER.put(Byte.class,
-		// ResponseReader.BYTE);
-		// JPRIMITIVETYPE_TO_RESPONSEREADER.put(Character.class,
-		// ResponseReader.CHAR);
-		// JPRIMITIVETYPE_TO_RESPONSEREADER.put(Double.class,
-		// ResponseReader.DOUBLE);
-		// JPRIMITIVETYPE_TO_RESPONSEREADER.put(Float.class,
-		// ResponseReader.FLOAT);
-		// JPRIMITIVETYPE_TO_RESPONSEREADER.put(Integer.class,
-		// ResponseReader.INT);
-		// JPRIMITIVETYPE_TO_RESPONSEREADER.put(Long.class,
-		// ResponseReader.LONG);
-		// JPRIMITIVETYPE_TO_RESPONSEREADER.put(Short.class,
-		// ResponseReader.SHORT);
-		// JPRIMITIVETYPE_TO_RESPONSEREADER.put(Void.class,
-		// ResponseReader.VOID);
-
 		JPRIMITIVETYPE_TO_RESPONSEREADER.put(boolean.class, ResponseReader.BOOLEAN);
 		JPRIMITIVETYPE_TO_RESPONSEREADER.put(byte.class, ResponseReader.BYTE);
 		JPRIMITIVETYPE_TO_RESPONSEREADER.put(char.class, ResponseReader.CHAR);
@@ -71,27 +52,21 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
 	private String remoteServiceRelativePath;
 	private String serializationPolicyName;
 	private CookieManager cookieManager;
-	private boolean waitForInvocation;
 	private Context context;
-	
-	public RemoteServiceInvocationHandler(String moduleBaseURL, String remoteServiceRelativePath, String serializationPolicyName, CookieManager cookieManager, Context context) {
-		this(moduleBaseURL, remoteServiceRelativePath, serializationPolicyName, cookieManager, false, context);
-	}
 
-	public RemoteServiceInvocationHandler(String moduleBaseURL, String remoteServiceRelativePath, String serializationPolicyName, CookieManager cookieManager,
-			boolean waitForInvocation, Context context) {
+	public RemoteServiceInvocationHandler(String moduleBaseURL, String remoteServiceRelativePath, String serializationPolicyName, CookieManager cookieManager, Context context) {
 		this.moduleBaseURL = moduleBaseURL;
 		this.remoteServiceRelativePath = remoteServiceRelativePath;
 		this.serializationPolicyName = serializationPolicyName;
 		this.cookieManager = cookieManager;
-		this.waitForInvocation = waitForInvocation;
 		this.context = context;
 	}
 
+	@SuppressWarnings("unchecked")
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		RemoteServiceSyncProxy syncProxy = new RemoteServiceSyncProxy(moduleBaseURL, remoteServiceRelativePath, serializationPolicyName, cookieManager, context);
-		Class remoteServiceInft = method.getDeclaringClass();
-		for (Class intf : proxy.getClass().getInterfaces()) {
+		Class<?> remoteServiceInft = method.getDeclaringClass();
+		for (Class<?> intf : proxy.getClass().getInterfaces()) {
 			if (RemoteService.class.isAssignableFrom(intf)) {
 				remoteServiceInft = intf;
 			}
@@ -99,8 +74,8 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
 
 		SerializationStreamWriter streamWriter = syncProxy.createStreamWriter();
 
-		AsyncCallback callback = null;
-		Class[] paramTypes = method.getParameterTypes();
+		AsyncCallback<Object> callback = null;
+		Class<?>[] paramTypes = method.getParameterTypes();
 		try {
 			// Determine whether sync or async
 			boolean isAsync = false;
@@ -108,17 +83,17 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
 			// method.getDeclaringClass().getCanonicalName();
 			String serviceIntfName = remoteServiceInft.getCanonicalName();
 			int paramCount = paramTypes.length;
-			Class returnType = method.getReturnType();
+			Class<?> returnType = method.getReturnType();
 			if (method.getDeclaringClass().getCanonicalName().endsWith("Async")) {
 				isAsync = true;
 				serviceIntfName = serviceIntfName.substring(0, serviceIntfName.length() - 5);
 				paramCount--;
-				callback = (AsyncCallback) args[paramCount];
+				callback = (AsyncCallback<Object>) args[paramCount];
 
 				// Determine the return type
-				Class[] syncParamTypes = new Class[paramCount];
+				Class<?>[] syncParamTypes = new Class[paramCount];
 				System.arraycopy(paramTypes, 0, syncParamTypes, 0, paramCount);
-				Class clazz;
+				Class<?> clazz;
 				try {
 					clazz = Class.forName(serviceIntfName);
 				} catch (ClassNotFoundException e) {
@@ -154,9 +129,9 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
 			String payload = streamWriter.toString();
 			if (isAsync) {
 				final RemoteServiceSyncProxy syncProxy_2 = syncProxy;
-				final Class returnType_2 = returnType;
+				final Class<?> returnType_2 = returnType;
 				final String payload_2 = payload;
-				final AsyncCallback callback_2 = callback;
+				final AsyncCallback<Object> callback_2 = callback;
 				AsyncTask<Void, Void, Object> asyncTask = new AsyncTask<Void, Void, Object>() {
 					
 					@Override
@@ -199,8 +174,8 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
 				callback.onFailure(ex);
 				return null;
 			}
-			Class[] expClasses = method.getExceptionTypes();
-			for (Class clazz : expClasses) {
+			Class<?>[] expClasses = method.getExceptionTypes();
+			for (Class<?> clazz : expClasses) {
 				if (clazz.isAssignableFrom(ex.getClass())) {
 					throw ex;
 				}
@@ -210,7 +185,7 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
 		}
 	}
 
-	private void writeParam(SerializationStreamWriter streamWriter, Class paramType, Object paramValue) throws SerializationException {
+	private void writeParam(SerializationStreamWriter streamWriter, Class<?> paramType, Object paramValue) throws SerializationException {
 		if (paramType == boolean.class) {
 			streamWriter.writeBoolean((Boolean) paramValue);
 			// } else if (paramType == Boolean.class){
@@ -250,7 +225,7 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
 		}
 	}
 
-	private ResponseReader getReaderFor(Class type) {
+	private ResponseReader getReaderFor(Class<?> type) {
 		ResponseReader primitiveResponseReader = JPRIMITIVETYPE_TO_RESPONSEREADER.get(type);
 		if (primitiveResponseReader != null) {
 			return primitiveResponseReader;

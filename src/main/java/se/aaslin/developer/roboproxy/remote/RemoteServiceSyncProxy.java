@@ -25,12 +25,12 @@ import java.net.CookieManager;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import se.aaslin.developer.roboproxy.io.SyncClientSerializationStreamReader;
-import se.aaslin.developer.roboproxy.io.SyncClientSerializationStreamWriter;
 import se.aaslin.developer.roboproxy.policy.RpcPolicyFinder;
 
 import android.content.Context;
 
+import com.gdevelop.gwt.syncrpc.SyncClientSerializationStreamReader;
+import com.gdevelop.gwt.syncrpc.SyncClientSerializationStreamWriter;
 import com.google.gwt.user.client.rpc.InvocationException;
 import com.google.gwt.user.client.rpc.RpcRequestBuilder;
 import com.google.gwt.user.client.rpc.SerializationException;

@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,73 +25,23 @@ public class RpcPolicyFinder {
 	private static final String GWT_PRC_POLICY_FILE_EXT = ".gwt.rpc";
 	private static final Map<String, String> CACHE_POLICY_FILE = new HashMap<String, String>();
 
-	private static final Logger logger = Logger.getLogger(RpcPolicyFinder.class.getName());
-
 	public static String getCachedPolicyFile(String url) {
 		return CACHE_POLICY_FILE.get(url);
 	}
 
-//	public static Map<String, String> searchPolicyFileInClassPath() {
-//		Map<String, String> result = new HashMap<String, String>();
-//		String classPath = System.getProperty("java.class.path");
-//		StringTokenizer st = new StringTokenizer(classPath, File.pathSeparator);
-//		while (st.hasMoreTokens()) {
-//			String path = st.nextToken();
-//			File f = new File(path);
-//			if (f.isDirectory()) {
-//				result.putAll(searchPolicyFileInDirectory(path));
-//			}
-//			// TODO: Search in jar, zip files
-//		}
-//
-//		if (result.size() == 0) {
-//			logger.warning("No RemoteService in the classpath");
-//		} else {
-//			dumpRemoteService(result);
-//		}
-//
-//		return result;
-//	}
-//
-//	public static Map<String, String> searchPolicyFileInDirectory(String path) {
-//		Map<String, String> result = new HashMap<String, String>();
-//
-//		String policyName = null;
-//		File f = new File(path);
-//		String[] children = f.list(new FilenameFilter() {
-//			public boolean accept(File dir, String name) {
-//				if (name.endsWith(GWT_PRC_POLICY_FILE_EXT)) {
-//					return true;
-//				}
-//				return false;
-//			}
-//		});
-//
-//		for (String child : children) {
-//			policyName = child.substring(0, child.length() - GWT_PRC_POLICY_FILE_EXT.length());
-//			try {
-//				result.putAll(parsePolicyName(policyName, new FileInputStream(new File(path, child))));
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
-//		}
-//
-//		return result;
-//	}
-	
-	public static Map<String, String> searchPolicyFilesInAssets(Context context, String path){
+	public static Map<String, String> searchPolicyFilesInAssets(Context context, String path) {
 		AssetManager assetManager = context.getAssets();
 		try {
 			List<String> gwtRPCPolicies = new ArrayList<String>();
-			for(String file : assetManager.list(path)){
+			for (String file : assetManager.list(path)) {
 				Log.i(TAG, file);
 				if (file.endsWith(GWT_PRC_POLICY_FILE_EXT)) {
 					gwtRPCPolicies.add(new StringBuilder().append(path).append(SEPARATOR).append(file).toString());
 				}
 			}
-			
+
 			Map<String, String> result = new HashMap<String, String>();
-			Log.i(TAG, "searchPolicyFilesInAssets " +gwtRPCPolicies.toString());
+			Log.i(TAG, "searchPolicyFilesInAssets " + gwtRPCPolicies.toString());
 			for (String gwtRPCPolicy : gwtRPCPolicies) {
 				String policyName = gwtRPCPolicy.substring(0, gwtRPCPolicy.length() - GWT_PRC_POLICY_FILE_EXT.length());
 				try {
@@ -102,10 +51,10 @@ public class RpcPolicyFinder {
 					e.printStackTrace();
 				}
 			}
-			
+
 			return result;
-			
-		} catch (IOException e) {	
+
+		} catch (IOException e) {
 			Log.w(TAG, "Could'nt extract any gwt rpc policies from /assets " + e.getMessage());
 		}
 
@@ -129,19 +78,19 @@ public class RpcPolicyFinder {
 		return result;
 	}
 
+	/**
+	 * Method to fetch serialization policy from server
+	 * 
+	 * @param moduleBaseURL
+	 * @return
+	 * @throws IOException
+	 */
 	public static Map<String, String> fetchSerializationPolicyName(String moduleBaseURL) throws IOException {
 		Map<String, String> result = new HashMap<String, String>();
 
 		moduleBaseURL = moduleBaseURL.trim(); // remove outer trim just in case
 		String[] urlparts = moduleBaseURL.split(SEPARATOR);
-		String moduleNoCacheJs = urlparts[urlparts.length - 1] + ".nocache.js"; // get
-																				// last
-																				// word
-																				// of
-																				// url
-																				// appended
-																				// with
-																				// .nocache.js
+		String moduleNoCacheJs = urlparts[urlparts.length - 1] + ".nocache.js";
 
 		String responseText = "";
 		responseText = getResposeText(moduleBaseURL + moduleNoCacheJs);
@@ -173,7 +122,7 @@ public class RpcPolicyFinder {
 		}
 
 		if (result.size() == 0) {
-			logger.warning("No RemoteService fetched from server");
+			Log.w(TAG, "No RemoteService fetched from server");
 		} else {
 			dumpRemoteService(result);
 		}
@@ -208,23 +157,14 @@ public class RpcPolicyFinder {
 
 	private static void dumpRemoteService(Map<String, String> result) {
 		if (result.size() > 0) {
-			logger.fine("Found following RemoteService(s) in the classpath:");
+			Log.i(TAG, "Found following RemoteService(s) in the classpath:");
 			String s = "";
 			for (String className : result.keySet()) {
 				s += className + "\n";
 			}
-			logger.fine(s);
+			Log.i(TAG, s);
 		} else {
-			logger.warning("No RemoteService in the result");
+			Log.w(TAG, "No RemoteService in the result");
 		}
 	}
-
-//	// Test
-//	public static void main(String[] args) throws Exception {
-//		Map<String, String> policyMap = searchPolicyFileInClassPath();
-//		System.out.println(policyMap);
-//
-//		policyMap = fetchSerializationPolicyName("http://localhost:8888/rpcsuite/");
-//		System.out.println(policyMap);
-//	}
 }
